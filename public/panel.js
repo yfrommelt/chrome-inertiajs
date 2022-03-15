@@ -171,35 +171,41 @@
   console.log = (...args) => {
     chrome.devtools.inspectedWindow.eval("console.log(" + args.map((arg) => JSON.stringify(arg)) + ");");
   };
-  var jsonContainer = document.querySelector("#json");
-  var renderJson = (jsonString) => {
-    const json = JSON.parse(jsonString);
-    const formatter = new import_json_formatter_js.default(json, 3, { theme: "dark" });
-    const node = formatter.render();
-    jsonContainer.innerHTML = "";
-    jsonContainer.appendChild(node);
-  };
-  var renderJsonFromHtml = (html) => {
-    if (!html.length) {
-      return;
-    }
-    const parser = new DOMParser();
-    const document2 = parser.parseFromString(html, "text/html");
-    const element = document2.querySelector("[data-page]");
-    if (element && element.dataset.page) {
-      renderJson(element.dataset.page);
-    }
-  };
-  chrome.devtools.inspectedWindow.getResources((resources) => {
-    const document2 = resources.find((resource) => resource.type === "document");
-    document2.getContent(renderJsonFromHtml);
-  });
-  chrome.devtools.network.onRequestFinished.addListener((request) => {
-    if (request._resourceType === "document") {
-      request.getContent(renderJsonFromHtml);
-    }
-    if (request.response.headers.find((header) => header.name === "X-Inertia")) {
-      request.getContent(renderJson);
-    }
+  chrome.storage.sync.get({ defaultOpenDepth: 3 }, (items) => {
+    console.log(items);
+    const defaultOpenDepth = items.defaultOpenDepth;
+    const jsonContainer = document.querySelector("#json");
+    const renderJson = (jsonString) => {
+      const json = JSON.parse(jsonString);
+      const formatter = new import_json_formatter_js.default(json, defaultOpenDepth, { theme: "dark" });
+      const node = formatter.render();
+      jsonContainer.innerHTML = "";
+      jsonContainer.appendChild(node);
+    };
+    const renderJsonFromHtml = (html) => {
+      if (!html.length) {
+        return;
+      }
+      const parser = new DOMParser();
+      const document2 = parser.parseFromString(html, "text/html");
+      const element = document2.querySelector("[data-page]");
+      if (element && element.dataset.page) {
+        renderJson(element.dataset.page);
+      } else {
+        jsonContainer.innerHTML = `<p class="init-warning">This page doesn't seem to be using Inertia.js</p>`;
+      }
+    };
+    chrome.devtools.inspectedWindow.getResources((resources) => {
+      const document2 = resources.find((resource) => resource.type === "document");
+      document2.getContent(renderJsonFromHtml);
+    });
+    chrome.devtools.network.onRequestFinished.addListener((request) => {
+      if (request._resourceType === "document") {
+        request.getContent(renderJsonFromHtml);
+      }
+      if (request.response.headers.find((header) => header.name === "X-Inertia")) {
+        request.getContent(renderJson);
+      }
+    });
   });
 })();
