@@ -171,8 +171,7 @@
   console.log = (...args) => {
     chrome.devtools.inspectedWindow.eval("console.log(" + args.map((arg) => JSON.stringify(arg)) + ");");
   };
-  chrome.storage.sync.get({ defaultOpenDepth: 3 }, (items) => {
-    console.log(items);
+  chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
     const defaultOpenDepth = items.defaultOpenDepth;
     const jsonContainer = document.querySelector("#json");
     const renderJson = (jsonString) => {
@@ -203,7 +202,7 @@
       if (request._resourceType === "document") {
         request.getContent(renderJsonFromHtml);
       }
-      if (request.response.headers.find((header) => header.name === "X-Inertia")) {
+      if (request.request.headers.find((header) => header.name === "x-inertia") || request.response.headers.find((header) => header.name === "X-Inertia")) {
         request.getContent(renderJson);
       }
     });

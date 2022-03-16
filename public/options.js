@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    chrome.storage.sync.get({ defaultOpenDepth: 3 }, (items) => {
+    chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
         document.querySelector('[name="depth"]').value = items.defaultOpenDepth;
     });
 });
