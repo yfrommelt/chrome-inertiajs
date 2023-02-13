@@ -1,6 +1,6 @@
 {
     "author": "Yoann Frommelt <yoann@frommelt.fr>",
-    "name": "Inertia.js",
+    "name": "Inertia.js devtools",
     "version": "0.2.1",
     "description": "Inertia.js page json in devtools panel",
     "icons": {

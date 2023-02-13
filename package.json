@@ -1,22 +1,23 @@
 {
     "name": "chrome-inertiajs",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "author": "Yoann Frommelt <yoann@frommelt.fr>",
     "license": "MIT",
     "scripts": {
-        "build:scripts": "esbuild src/panel.js --bundle --outfile=public/panel.js",
-        "build:styles": "sass src/panel.scss public/panel.css",
+        "build:scripts": "esbuild src/*.js --bundle --outdir=public",
+        "build:styles": "sass src:public",
         "build": "npm-run-all --parallel build:scripts build:styles",
         "watch:scripts": "npm run build:scripts -- --watch",
         "watch:styles": "npm run build:styles -- --watch",
         "watch": "npm-run-all --parallel watch:scripts watch:styles"
     },
     "dependencies": {
-        "json-formatter-js": "^2.3.4"
+        "ace-builds": "^1.15.0"
     },
     "devDependencies": {
         "esbuild": "^0.14.25",
         "npm-run-all": "^4.1.5",
+        "prettier": "^2.8.4",
         "sass": "^1.49.9"
     }
 }
