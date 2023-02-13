@@ -1,23 +1,32 @@
-import JSONFormatter from 'json-formatter-js'
+import ace from 'ace-builds'
+import jsonWorkerUrl from "ace-builds/src-noconflict/worker-json";
+import "ace-builds/src-noconflict/mode-json";
+import "ace-builds/src-noconflict/theme-dracula";
 
 console.log = (...args) => {
     chrome.devtools.inspectedWindow.eval('console.log(' + args.map(arg => JSON.stringify(arg)) + ');');
 }
 
+const tabSize = 2
+
 chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
     const defaultOpenDepth = items.defaultOpenDepth;
 
     const jsonContainer = document.querySelector('#json');
+    ace.config.setModuleUrl("ace/mode/json_worker", jsonWorkerUrl);
+    const editor = ace.edit(jsonContainer);
+    editor.getSession().setMode("ace/mode/json");
+    editor.setTheme("ace/theme/dracula");
+    editor.getSession().setTabSize(tabSize);
+
     const renderJson = (jsonString) => {
-        const json = JSON.parse(jsonString)
-        const formatter = new JSONFormatter(json, defaultOpenDepth, { theme: 'dark' });
-        const node = formatter.render()
-        jsonContainer.innerHTML = ''
-        jsonContainer.appendChild(node)
+        const value = JSON.stringify(JSON.parse(jsonString), null, '\t')
+        editor.setValue(value)
+        editor.getSession().foldToLevel(defaultOpenDepth);
     }
 
     const renderJsonFromHtml = (html) => {
-        if (!html.length) {
+        if (!html?.length) {
             return
         }
         const parser = new DOMParser();
@@ -26,9 +35,13 @@ chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
         if (element && element.dataset.page) {
             renderJson(element.dataset.page)
         } else {
-            jsonContainer.innerHTML = `<p class="init-warning">This page doesn't seem to be using Inertia.js</p>`
+            editor.setValue(`/* This page doesn’t seem to be using Inertia.js */`)
         }
     }
+
+    document.querySelector('#send').addEventListener('click', () => {
+        chrome.devtools.inspectedWindow.eval(`dispatchEvent(new PopStateEvent("popstate", {state: ${editor.getValue()}}))`)
+    })
 
     // on panel open get current document
     chrome.devtools.inspectedWindow.getResources(
@@ -51,3 +64,5 @@ chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
         }
     );
 });
+
+
