@@ -39,9 +39,17 @@ chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
         }
     }
 
-    document.querySelector('#send').addEventListener('click', () => {
+    const sendJson = () => {
         chrome.devtools.inspectedWindow.eval(`dispatchEvent(new PopStateEvent("popstate", {state: ${editor.getValue()}}))`)
+    }
+
+    editor.commands.addCommand({
+        name: "Send",
+        exec: sendJson,
+        bindKey: {mac: "cmd-return", win: "ctrl-return"}
     })
+
+    document.querySelector('#send').addEventListener('click', sendJson)
 
     // on panel open get current document
     chrome.devtools.inspectedWindow.getResources(

@@ -21982,9 +21982,15 @@ styles.join("\\n")
         editor.setValue(`/* This page doesn\u2019t seem to be using Inertia.js */`);
       }
     };
-    document.querySelector("#send").addEventListener("click", () => {
+    const sendJson = () => {
       chrome.devtools.inspectedWindow.eval(`dispatchEvent(new PopStateEvent("popstate", {state: ${editor.getValue()}}))`);
+    };
+    editor.commands.addCommand({
+      name: "Send",
+      exec: sendJson,
+      bindKey: { mac: "cmd-return", win: "ctrl-return" }
     });
+    document.querySelector("#send").addEventListener("click", sendJson);
     chrome.devtools.inspectedWindow.getResources((resources) => {
       const document2 = resources.find((resource) => resource.type === "document");
       document2.getContent(renderJsonFromHtml);
