@@ -21997,10 +21997,14 @@ styles.join("\\n")
     });
     chrome.devtools.network.onRequestFinished.addListener((request) => {
       if (request._resourceType === "document") {
-        request.getContent(renderJsonFromHtml);
+        if (request.response.content.mimeType.includes("text/html")) {
+          request.getContent(renderJsonFromHtml);
+        }
+        return;
       }
       if (request.request.headers.find((header) => header.name === "x-inertia") || request.response.headers.find((header) => header.name === "X-Inertia")) {
         request.getContent(renderJson);
+        return;
       }
     });
   });
