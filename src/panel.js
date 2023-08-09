@@ -30,7 +30,7 @@ chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
         return inertiaPage = nextPage;
     }
 
-    const renderJson = (jsonString, isPartial) => {
+    const renderJson = (jsonString, isPartial = false) => {
         const page = mergePage(JSON.parse(jsonString), isPartial);
         const value = JSON.stringify(page, null, '\t')
         editor.setValue(value)
@@ -80,13 +80,11 @@ chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
                 }
                 return
             }
-            if (request.request.headers.find((header) => header.name === 'x-inertia') ||
-                request.response.headers.find((header) => header.name === 'X-Inertia')) {
-                if (request.request.headers.some((header) => header.name === 'x-inertia-partial-data')) {
-                    request.getContent((content) => renderJson(content, true))
-                } else {
-                    request.getContent((content) => renderJson(content))
-                }
+            if (request.response.headers.find((header) => header.name === 'X-Inertia')) {
+                const isPartial = request.request.headers.some(
+                    (header) => header.name.toLowerCase() === 'x-inertia-partial-data'
+                );
+                request.getContent((content) => renderJson(content, isPartial));
                 return
             }
         }
