@@ -85,7 +85,7 @@ chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
                 if (request.request.headers.some((header) => header.name === 'x-inertia-partial-data')) {
                     request.getContent((content) => renderJson(content, true))
                 } else {
-                    request.getContent(renderJson)
+                    request.getContent((content) => renderJson(content))
                 }
                 return
             }
