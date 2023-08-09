@@ -21,7 +21,7 @@ chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
 
     let inertiaPage = {};
     const mergePage = (nextPage, isPartial = false) => {
-        if (isPartial) {
+        if (isPartial && inertiaPage.component === nextPage.component) {
             return inertiaPage = {
                 ...nextPage,
                 props: { ...inertiaPage.props, ...nextPage.props },
