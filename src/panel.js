@@ -19,8 +19,20 @@ chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
     editor.setTheme("ace/theme/dracula");
     editor.getSession().setTabSize(tabSize);
 
-    const renderJson = (jsonString) => {
-        const value = JSON.stringify(JSON.parse(jsonString), null, '\t')
+    let inertiaPage = {};
+    const mergePage = (nextPage, isPartial = false) => {
+        if (isPartial) {
+            return inertiaPage = {
+                ...nextPage,
+                props: { ...inertiaPage.props, ...nextPage.props },
+            }
+        }
+        return inertiaPage = nextPage;
+    }
+
+    const renderJson = (jsonString, isPartial) => {
+        const page = mergePage(JSON.parse(jsonString), isPartial);
+        const value = JSON.stringify(page, null, '\t')
         editor.setValue(value)
         editor.getSession().foldToLevel(defaultOpenDepth);
     }
@@ -70,7 +82,11 @@ chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
             }
             if (request.request.headers.find((header) => header.name === 'x-inertia') ||
                 request.response.headers.find((header) => header.name === 'X-Inertia')) {
-                request.getContent(renderJson)
+                if (request.request.headers.some((header) => header.name === 'x-inertia-partial-data')) {
+                    request.getContent((content) => renderJson(content, true))
+                } else {
+                    request.getContent(renderJson)
+                }
                 return
             }
         }
