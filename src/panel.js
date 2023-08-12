@@ -80,7 +80,7 @@ chrome.storage.sync.get({ defaultOpenDepth: 2 }, (items) => {
                 }
                 return
             }
-            if (request.response.headers.find((header) => header.name === 'X-Inertia')) {
+            if (request.response.headers.find((header) => header.name.toLowerCase() === 'x-inertia')) {
                 const isPartial = request.request.headers.some(
                     (header) => header.name.toLowerCase() === 'x-inertia-partial-data'
                 );
